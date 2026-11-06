@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popcorn</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0810; color: #eee; font: 15px/1.45 -apple-system, BlinkMacSystemFont, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  p.sub { color: rgba(255,255,255,.6); margin: 0 0 24px; }
+  form { display: flex; gap: 8px; }
+  input { flex: 1; min-width: 0; background: #17111d; color: #fff; border: 1px solid #3a2544; border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+  input:focus { outline: none; border-color: #e0479e; }
+  button { background: #e0479e; color: #fff; border: 0; border-radius: 10px; padding: 0 18px; font-weight: 700; font-size: 15px; cursor: pointer; }
+  #msg { min-height: 22px; margin: 10px 2px; color: #ff9ad5; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.45); margin: 32px 0 8px; }
+  a.v { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 10px; color: #eee; text-decoration: none; }
+  a.v:hover { background: #17111d; }
+  a.v img { width: 120px; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; flex: none; }
+  .meta { color: rgba(255,255,255,.5); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🍿 Popcorn</h1>
+  <p class="sub">Paste a YouTube link. I research it, then pop facts over it while you watch, here or on youtube.com with the extension.</p>
+  <form id="f"><input id="u" placeholder="https://www.youtube.com/watch?v=…" autofocus><button>Pop it</button></form>
+  <div id="msg"></div>
+  <h2>Ready to watch</h2>
+  <div id="list"></div>
+</main>
+<script>
+  const msg = document.getElementById("msg");
+  document.getElementById("f").onsubmit = async (e) => {
+    e.preventDefault();
+    const url = document.getElementById("u").value.trim();
+    if (!url) return;
+    const r = await fetch("/api/research", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+    const st = await r.json().catch(() => ({}));
+    if (!r.ok || !st.id || st.state === "error") { msg.textContent = st.step || st.error || "That didn't work."; return; }
+    location.href = `/watch?v=${st.id}`;
+  };
+  (async () => {
+    const vids = await (await fetch("/api/videos")).json();
+    const list = document.getElementById("list");
+    if (!vids.length) list.innerHTML = '<p class="meta">Nothing yet.</p>';
+    for (const v of vids) {
+      const a = document.createElement("a");
+      a.className = "v"; a.href = `/watch?v=${v.id}`;
+      const img = document.createElement("img");
+      img.src = `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`; img.alt = "";
+      const box = document.createElement("div");
+      const t = document.createElement("div"); t.textContent = v.title;
+      const m = document.createElement("div"); m.className = "meta"; m.textContent = `${v.channel} · ${v.count} facts · ${v.made}`;
+      box.append(t, m); a.append(img, box); list.append(a);
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+/* Everything is sized in em: overlay.js sets .pc-root's font-size from the player's width,
+   so the cards grow with a big player or fullscreen and shrink on Shorts and phones. */
+.pc-root {
+  position: absolute; inset: 0; pointer-events: none; z-index: 61;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  font-size: 15px; line-height: 1.42;
+  color: #fff; -webkit-font-smoothing: antialiased;
+}
+.pc-root * { box-sizing: border-box; }
+.pc-pill {
+  position: absolute; top: 1em; right: 1em; pointer-events: auto; cursor: pointer;
+  background: rgba(18, 12, 22, .8); color: #fff; border: .07em solid rgba(255, 120, 200, .5);
+  border-radius: 999px; padding: .45em .9em; font-family: inherit; font-size: .95em; font-weight: 600; line-height: 1;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 .3em 1.2em rgba(0, 0, 0, .35); transition: transform .15s, background .15s;
+}
+.pc-pill:hover { transform: scale(1.05); background: rgba(40, 18, 44, .9); }
+.pc-pill.pc-off { opacity: .55; }
+.pc-pill.pc-warn { border-color: rgba(255, 170, 80, .75); }
+.pc-pill.pc-busy { animation: pc-breathe 1.6s ease-in-out infinite; }
+@keyframes pc-breathe { 50% { border-color: rgba(255, 120, 200, 1); box-shadow: 0 0 1.5em rgba(224, 71, 158, .55); } }
+
+.pc-stack {
+  position: absolute; top: 3.9em; right: 1em; width: min(25em, 44%);
+  display: flex; flex-direction: column; gap: .7em;
+}
+.pc-bubble {
+  pointer-events: auto; position: relative; overflow: hidden;
+  background: linear-gradient(160deg, rgba(30, 16, 38, .95), rgba(12, 8, 18, .95));
+  border: .07em solid rgba(255, 255, 255, .14); border-left: .3em solid #e0479e;
+  border-radius: 1em; padding: .85em 1.05em 1em;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 .7em 2em rgba(0, 0, 0, .5);
+  transform-origin: top right; animation: pc-pop .42s cubic-bezier(.2, 1.6, .4, 1) both;
+}
+.pc-bubble.pc-out { animation: pc-gone .25s ease-in both; }
+@keyframes pc-pop { from { opacity: 0; transform: scale(.55) translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes pc-gone { to { opacity: 0; transform: scale(.85) translateX(16px); } }
+.pc-bubble[data-kind="correction"] { border-left-color: #ff8a3d; }
+.pc-bubble[data-kind="update"] { border-left-color: #4fd1c5; }
+.pc-bubble[data-kind="numbers"] { border-left-color: #f6d860; }
+.pc-bubble[data-kind="people"] { border-left-color: #a78bfa; }
+.pc-bubble[data-kind="backstory"] { border-left-color: #c084fc; }
+.pc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .3em; }
+.pc-kind { font-size: .72em; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #ff9ad5; }
+.pc-t { font-size: .75em; color: rgba(255, 255, 255, .5); font-variant-numeric: tabular-nums; }
+.pc-head { font-weight: 700; font-size: 1.12em; line-height: 1.25; margin-bottom: .25em; }
+.pc-body { font-size: 1em; color: rgba(255, 255, 255, .93); }
+.pc-src { display: inline-block; margin-top: .45em; font-size: .75em; color: rgba(255, 180, 225, .8); text-decoration: none; }
+.pc-src:hover { text-decoration: underline; color: #ffc4e6; }
+.pc-bar { position: absolute; left: 0; right: 0; bottom: 0; height: .15em; background: rgba(255, 255, 255, .06); }
+.pc-bar-fill { height: 100%; background: linear-gradient(90deg, #e0479e, #a78bfa); transform-origin: left; transition: transform .2s linear; }
+
+.pc-panel {
+  position: absolute; top: 3.7em; right: 1em; width: min(27em, 60%); max-height: 72%;
+  pointer-events: auto; display: flex; flex-direction: column;
+  background: rgba(14, 10, 20, .96); border: .07em solid rgba(255, 120, 200, .3); border-radius: 1em;
+  box-shadow: 0 1em 2.8em rgba(0, 0, 0, .55); z-index: 2;
+}
+.pc-panel.pc-hidden { display: none; }
+.pc-panel-head { display: flex; justify-content: space-between; align-items: center; padding: .7em .85em; border-bottom: .07em solid rgba(255, 255, 255, .08); }
+.pc-panel-title { font-weight: 700; }
+.pc-toggle, .pc-row { font-family: inherit; color: #fff; cursor: pointer; border: 0; }
+.pc-toggle { background: rgba(224, 71, 158, .25); border-radius: .55em; padding: .35em .65em; font-size: .85em; }
+.pc-toggle:hover { background: rgba(224, 71, 158, .45); }
+.pc-list { overflow-y: auto; padding: .4em; }
+.pc-row { display: flex; gap: .7em; width: 100%; text-align: left; background: none; padding: .5em .55em; border-radius: .55em; font-size: .93em; }
+.pc-row:hover { background: rgba(255, 255, 255, .07); }
+.pc-row-t { color: #ff9ad5; font-variant-numeric: tabular-nums; min-width: 2.7em; }
+
+/* Shorts and small players: full-width cards instead of a corner column */
+/* the pill sits below Shorts' own top-right buttons */
+.pc-root.pc-narrow .pc-pill { top: 4.2em; right: .7em; }
+.pc-root.pc-narrow .pc-stack { left: .7em; right: .7em; width: auto; top: 6.6em; }
+.pc-root.pc-narrow .pc-panel { left: .7em; right: .7em; width: auto; top: 6.4em; }
+.pc-btns { display: flex; gap: .4em; }

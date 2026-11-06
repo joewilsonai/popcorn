@@ -1,0 +1,78 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../extension/overlay.css">
+<style>
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; background: #0b0810;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; color: #fff; }
+  .player { position: absolute; left: 40px; top: 40px; width: 1200px; height: 675px; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); }
+  /* stand-in "video": a stage under colored lights */
+  .scene { position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 70% at 22% 18%, rgba(224,71,158,.55), transparent 60%),
+      radial-gradient(ellipse 50% 60% at 78% 10%, rgba(139,92,246,.5), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 110%, rgba(255,140,60,.35), transparent 60%),
+      linear-gradient(180deg, #1c1026 0%, #0d0812 70%, #120a10 100%); }
+  .beam { position: absolute; top: -40px; width: 180px; height: 760px; filter: blur(18px); opacity: .35;
+    background: linear-gradient(180deg, rgba(255,210,240,.9), transparent 80%); transform-origin: top center; }
+  .bokeh { position: absolute; border-radius: 50%; filter: blur(2px); }
+  .crowd { position: absolute; left: 0; right: 0; bottom: 0; height: 200px; }
+  .crowd span { position: absolute; bottom: 0; background: #07040a; border-radius: 50% 50% 0 0; }
+  .figure { position: absolute; left: 330px; bottom: 60px; width: 230px; height: 430px;
+    background: radial-gradient(ellipse 45% 18% at 50% 14%, #050307 98%, transparent 100%),
+                radial-gradient(ellipse 50% 60% at 50% 80%, #050307 98%, transparent 100%); opacity: .92; }
+  .mic { position: absolute; left: 470px; bottom: 60px; width: 6px; height: 300px; background: #050307; transform: rotate(-8deg); }
+  .grain { position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay;
+    background-image: repeating-radial-gradient(circle at 17% 32%, #fff 0 1px, transparent 1px 3px); }
+  .controls { position: absolute; left: 0; right: 0; bottom: 0; height: 64px;
+    background: linear-gradient(0deg, rgba(0,0,0,.7), transparent); }
+  .bar { position: absolute; left: 22px; right: 22px; bottom: 44px; height: 4px; background: rgba(255,255,255,.25); border-radius: 2px; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 41%; background: #e0479e; border-radius: 2px; }
+  .bar b { position: absolute; left: 41%; top: -5px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #e0479e; }
+  .time { position: absolute; left: 70px; bottom: 14px; font-size: 15px; color: rgba(255,255,255,.85); }
+  .play { position: absolute; left: 24px; bottom: 12px; width: 0; height: 0; border-left: 16px solid #fff;
+    border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+  .caption { position: absolute; left: 40px; top: 734px; display: flex; align-items: center; gap: 14px; }
+  .caption img { width: 40px; height: 40px; border-radius: 10px; }
+  .caption .t { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+  .caption .s { font-size: 15px; color: rgba(255,255,255,.6); margin-left: 6px; }
+</style></head>
+<body>
+<div class="player" id="player">
+  <div class="scene"></div>
+  <div class="beam" style="left:150px; transform: rotate(14deg)"></div>
+  <div class="beam" style="left:520px; transform: rotate(-6deg); opacity:.22"></div>
+  <div class="beam" style="left:860px; transform: rotate(-16deg); opacity:.25"></div>
+  <div class="crowd" id="crowd"></div>
+  <div class="grain"></div>
+  <div class="controls"><div class="bar"><i></i><b></b></div><div class="play"></div><div class="time">1:28 / 3:33</div></div>
+</div>
+<div class="caption"><img src="../../extension/icons/128.png" alt=""><span class="t">Popcorn</span><span class="s">researched facts that pop up while you watch</span></div>
+<script src="../../extension/overlay.js"></script>
+<script>
+  // Static render of the real overlay with two facts frozen on screen.
+  const player = document.getElementById("player");
+  const facts = [
+    { t: 84, kind: "backstory", headline: "Rickrolling began as a fake trailer",
+      body: "In May 2007 a 4chan link promising the Grand Theft Auto IV trailer sent people to this video instead. That prank became rickrolling.",
+      source: "https://en.wikipedia.org/wiki/Rickrolling" },
+    { t: 88, kind: "people", headline: "He was the studio tea boy first",
+      body: "Before the hit, Astley spent two years making tea at Pete Waterman's studio.",
+      source: "https://en.wikipedia.org/wiki/Rick_Astley" },
+  ];
+  const crowd = document.getElementById("crowd");
+  for (let i = 0; i < 26; i++) {
+    const head = document.createElement("span"), w = 52 + (i * 37 % 30), x = i * 47 - 20 + (i * 13 % 17);
+    const h = 70 + (i * 53 % 60);
+    head.style.cssText = `left:${x}px;width:${w}px;height:${h}px;border-radius:${w/2}px ${w/2}px 8px 8px`;
+    crowd.appendChild(head);
+  }
+  for (let i = 0; i < 12; i++) facts.push({ t: 300 + i * 20, kind: "fact", headline: "", body: "x" });
+  const ui = Popcorn.create(player, { getTime: () => 90, seek() {} });
+  ui.setFacts({ facts });
+  setTimeout(() => {
+    for (const b of document.querySelectorAll(".pc-bubble")) b.style.animation = "none";
+    document.body.dataset.ready = "1";
+  }, 600);
+</script>
+</body></html>
